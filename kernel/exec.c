@@ -33,7 +33,8 @@ exec(char *path, char **argv)
 
   // Load program into memory.
   sz = 0;
-  for(i=0, off=elf.phoff; i<elf.phnum; i++, off+=sizeof(ph)){
+	//EDIT: changed i=0 and i<elf.phnum
+  for(i=PGSIZE, off=elf.phoff; i<(elf.phnum + PGSIZE); i++, off+=sizeof(ph)){
     if(readi(ip, (char*)&ph, off, sizeof(ph)) != sizeof(ph))
       goto bad;
     if(ph.type != ELF_PROG_LOAD)
