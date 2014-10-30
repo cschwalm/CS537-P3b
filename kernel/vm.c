@@ -32,8 +32,8 @@ seginit(void)
   c = &cpus[cpunum()];
   c->gdt[SEG_KCODE] = SEG(STA_X|STA_R, 0, 0xffffffff, 0);
   c->gdt[SEG_KDATA] = SEG(STA_W, 0, 0xffffffff, 0);
-  c->gdt[SEG_UCODE] = SEG(STA_X|STA_R, 0, 0xffffffff, DPL_USER);
-  c->gdt[SEG_UDATA] = SEG(STA_W, 0, 0xffffffff, DPL_USER);
+  c->gdt[SEG_UCODE] = SEG(STA_X|STA_R, 0x00000000, 0xffffffff, DPL_USER);
+  c->gdt[SEG_UDATA] = SEG(STA_W, 0x00000000, 0xffffffff, DPL_USER);
 
   // Map cpu, and curproc
   c->gdt[SEG_KCPU] = SEG(STA_W, &c->cpu, 8, 0);
@@ -189,12 +189,15 @@ switchuvm(struct proc *p)
 void
 inituvm(pde_t *pgdir, char *init, uint sz)
 {
-  char *mem;
-  
+  //EDIT: char *mem; NOT CURRENTLY WORKING
+	char *mem = (char*) 0x1000;
+ 	
+	cprintf("starting init\n"); 
   if(sz >= PGSIZE)
     panic("inituvm: more than a page");
   mem = kalloc();
-  memset(mem, 0, PGSIZE);
+  //EDIT: mem, 0, PGSIZE
+	memset(mem, 0, PGSIZE);
   mappages(pgdir, 0, PGSIZE, PADDR(mem), PTE_W|PTE_U);
   memmove(mem, init, sz);
 }
@@ -209,7 +212,8 @@ loaduvm(pde_t *pgdir, char *addr, struct inode *ip, uint offset, uint sz)
 
   if((uint)addr % PGSIZE != 0)
     panic("loaduvm: addr must be page aligned");
-  for(i = 0; i < sz; i += PGSIZE){
+	//EDIT: i = 0
+  for(i = PGSIZE; i < sz; i += PGSIZE){
     if((pte = walkpgdir(pgdir, addr+i, 0)) == 0)
       panic("loaduvm: address should exist");
     pa = PTE_ADDR(*pte);
