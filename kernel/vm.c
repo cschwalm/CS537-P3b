@@ -189,15 +189,13 @@ switchuvm(struct proc *p)
 void
 inituvm(pde_t *pgdir, char *init, uint sz)
 {
-  //EDIT: char *mem; NOT CURRENTLY WORKING
-	char *mem = (char*) 0x1000;
+	char *mem;
  	
 	cprintf("starting init\n"); 
   if(sz >= PGSIZE)
     panic("inituvm: more than a page");
   mem = kalloc();
-  //EDIT: mem, 0, PGSIZE
-	memset(mem, 0, PGSIZE);
+  memset(mem, 0, PGSIZE);
   mappages(pgdir, 0, PGSIZE, PADDR(mem), PTE_W|PTE_U);
   memmove(mem, init, sz);
 }
@@ -212,8 +210,9 @@ loaduvm(pde_t *pgdir, char *addr, struct inode *ip, uint offset, uint sz)
 
   if((uint)addr % PGSIZE != 0)
     panic("loaduvm: addr must be page aligned");
-	//EDIT: i = 0
-  for(i = PGSIZE; i < sz; i += PGSIZE){
+  //EDIT: i = 0, addr is already 1000, start at 0
+  //cprintf("sz: %p, addr: %p\n", sz, addr);
+  for(i = 0; i < sz; i += PGSIZE){
     if((pte = walkpgdir(pgdir, addr+i, 0)) == 0)
       panic("loaduvm: address should exist");
     pa = PTE_ADDR(*pte);
@@ -242,6 +241,9 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
 
   a = PGROUNDUP(oldsz);
   for(; a < newsz; a += PGSIZE){
+    //EDIT We skip the initilize of this page table entry if it equals 0
+	if (a == 0)
+      continue;
     mem = kalloc();
     if(mem == 0){
       cprintf("allocuvm out of memory\n");
@@ -311,6 +313,7 @@ copyuvm(pde_t *pgdir, uint sz)
   if((d = setupkvm()) == 0)
     return 0;
 	//EDIT: i = 0
+  //cprintf("PGSIZE: %d, sz: %d\n", PGSIZE, sz);
   for(i = PGSIZE; i < sz; i += PGSIZE){
     if((pte = walkpgdir(pgdir, (void*)i, 0)) == 0)
       panic("copyuvm: pte should exist");

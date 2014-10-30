@@ -33,8 +33,10 @@ exec(char *path, char **argv)
 
   // Load program into memory.
   sz = 0;
-	//EDIT: changed i=0 and i<elf.phnum
-  for(i=PGSIZE, off=elf.phoff; i<(elf.phnum + PGSIZE); i++, off+=sizeof(ph)){
+  //EDIT: changed i=0 and i<elf.phnum, EDIT changed it back
+  //cprintf("elf.phoff: %d, elf.phnum: %d, PGSIZE: %d\n", elf.phoff, elf.phnum, PGSIZE);
+  //elf.phoff: 52, elf.phnum: 2, PGSIZE: 4096
+  for(i=1, off=elf.phoff; i<(elf.phnum + 1); i++, off+=sizeof(ph)){
     if(readi(ip, (char*)&ph, off, sizeof(ph)) != sizeof(ph))
       goto bad;
     if(ph.type != ELF_PROG_LOAD)
@@ -51,6 +53,7 @@ exec(char *path, char **argv)
 
   // Allocate a one-page stack at the next page boundary
   sz = PGROUNDUP(sz);
+  
   if((sz = allocuvm(pgdir, sz, sz + PGSIZE)) == 0)
     goto bad;
 
