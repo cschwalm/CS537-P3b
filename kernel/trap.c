@@ -75,6 +75,13 @@ trap(struct trapframe *tf)
             cpu->id, tf->cs, tf->eip);
     lapiceoi();
     break;
+	case T_PGFLT:
+		if (((int)proc->botStack - rcr2() < PGSIZE) && ((int)proc->botStack - 2*PGSIZE >= proc->sz))
+		{
+			if(growStack() == 0)
+				break;
+			cprintf("failed growStack return\n");
+		}
    
   default:
     if(proc == 0 || (tf->cs&3) == 0){

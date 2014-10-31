@@ -102,6 +102,17 @@ userinit(void)
   release(&ptable.lock);
 }
 
+int
+growStack(void)
+{
+	if (allocuvm(proc->pgdir, (int)proc->botStack - PGSIZE, (int)proc->botStack) == 0)
+		return -1;
+	proc->botStack = (char*)((int)proc->botStack - PGSIZE);
+	switchuvm(proc);
+	return 0;
+}
+
+
 // Grow current process's memory by n bytes.
 // Return 0 on success, -1 on failure.
 int
@@ -111,7 +122,7 @@ growproc(int n)
   
   sz = proc->sz;
   if(n > 0){
-    if (sz + n > USERTOP - 2*PGSIZE)
+    if (sz + n > ((int)proc->botStack - PGSIZE))
 			return -1;
 		if((sz = allocuvm(proc->pgdir, sz, sz + n)) == 0)
       return -1;
@@ -148,7 +159,7 @@ fork(void)
   np->parent = proc;
 	//cprintf("sp: %p\n", proc->tf->esp);
   *np->tf = *proc->tf;
-	//np->sp = proc->sp;
+	np->botStack = proc->botStack;
 	//cprintf("new sp: %p\n", np->tf->esp);
 
   // Clear %eax so that fork returns 0 in the child.

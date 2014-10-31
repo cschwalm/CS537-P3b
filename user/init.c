@@ -12,7 +12,6 @@ main(void)
 {
   int pid, wpid;
 
-	//exit();
   if(open("console", O_RDWR) < 0){
     mknod("console", 1, 1);
     open("console", O_RDWR);
@@ -20,18 +19,14 @@ main(void)
   dup(0);  // stdout
   dup(0);  // stderr
 
-	//exit();
-	//printf(1, "hello\n");
   for(;;){
 		printf(1, "init: starting sh\n");
     pid = fork();
-		//exit();
     if(pid < 0){
       printf(1, "init: fork failed\n");
       exit();
     }
     if(pid == 0){
-      //exit();
 			exec("sh", argv);
       printf(1, "init: exec sh failed\n");
       exit();

@@ -197,7 +197,6 @@ inituvm(pde_t *pgdir, char *init, uint sz)
   mem = kalloc();
   memset(mem, 0, PGSIZE);
   mappages(pgdir, 0, PGSIZE, PADDR(mem), PTE_W|PTE_U);
-	cprintf("init: %p\n", init);
   memmove(mem, init, sz);
 	//cprintf("After memmove\n");
 }
