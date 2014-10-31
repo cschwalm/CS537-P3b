@@ -36,7 +36,7 @@ exec(char *path, char **argv)
   //EDIT: changed i=0 and i<elf.phnum, EDIT changed it back
   //cprintf("elf.phoff: %d, elf.phnum: %d, PGSIZE: %d\n", elf.phoff, elf.phnum, PGSIZE);
   //elf.phoff: 52, elf.phnum: 2, PGSIZE: 4096
-  for(i=1, off=elf.phoff; i<(elf.phnum + 1); i++, off+=sizeof(ph)){
+  for(i=0, off=elf.phoff; i<(elf.phnum); i++, off+=sizeof(ph)){
     if(readi(ip, (char*)&ph, off, sizeof(ph)) != sizeof(ph))
       goto bad;
     if(ph.type != ELF_PROG_LOAD)
