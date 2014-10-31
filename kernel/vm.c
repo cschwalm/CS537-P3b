@@ -191,13 +191,13 @@ inituvm(pde_t *pgdir, char *init, uint sz)
 {
 	char *mem;
  	
-	//cprintf("starting init\n"); 
+	cprintf("starting init\n"); 
   if(sz >= PGSIZE)
     panic("inituvm: more than a page");
   mem = kalloc();
   memset(mem, 0, PGSIZE);
   mappages(pgdir, 0, PGSIZE, PADDR(mem), PTE_W|PTE_U);
-	//cprintf("Before memmove\n");
+	cprintf("init: %p\n", init);
   memmove(mem, init, sz);
 	//cprintf("After memmove\n");
 }
