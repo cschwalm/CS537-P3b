@@ -91,8 +91,9 @@ userinit(void)
   p->tf->es = p->tf->ds;
   p->tf->ss = p->tf->ds;
   p->tf->eflags = FL_IF;
-  p->tf->esp = PGSIZE;
-  p->tf->eip = 0;  // beginning of initcode.S
+  //EDIT
+	p->tf->esp = PGSIZE;   //USERTOP? PGSIZE;
+	p->tf->eip = 0;  // beginning of initcode.S
 
   safestrcpy(p->name, "initcode", sizeof(p->name));
   p->cwd = namei("/");
@@ -143,7 +144,10 @@ fork(void)
   }
   np->sz = proc->sz;
   np->parent = proc;
+	cprintf("sp: %p\n", proc->tf->esp);
   *np->tf = *proc->tf;
+	//np->sp = proc->sp;
+	cprintf("new sp: %p\n", np->tf->esp);
 
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
@@ -156,6 +160,7 @@ fork(void)
   pid = np->pid;
   np->state = RUNNABLE;
   safestrcpy(np->name, proc->name, sizeof(proc->name));
+	cprintf("pid: %d\n", pid);
   return pid;
 }
 

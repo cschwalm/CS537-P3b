@@ -239,7 +239,7 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
   char *mem;
   uint a;
 
-  if(newsz > USERTOP - 2*PGSIZE)
+  if(newsz > USERTOP)
     return 0;
   if(newsz < oldsz)
     return oldsz;
@@ -258,6 +258,7 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
     memset(mem, 0, PGSIZE);
     mappages(pgdir, (char*)a, PGSIZE, PADDR(mem), PTE_W|PTE_U);
   }
+	cprintf("allocuvm succeeded\n");
   return newsz;
 }
 
@@ -318,7 +319,7 @@ copyuvm(pde_t *pgdir, uint sz)
   if((d = setupkvm()) == 0)
     return 0;
 	//EDIT: i = 0
-  //cprintf("PGSIZE: %d, sz: %d\n", PGSIZE, sz);
+  cprintf("PGSIZE: %d, sz: %d\n", PGSIZE, sz);
   for(i = PGSIZE; i < sz; i += PGSIZE){
     if((pte = walkpgdir(pgdir, (void*)i, 0)) == 0)
       panic("copyuvm: pte should exist");
@@ -332,6 +333,7 @@ copyuvm(pde_t *pgdir, uint sz)
       goto bad;
   }
 
+	
 	//EDIT: special case to copy the stack
   for(i = USERTOP-PGSIZE; i < USERTOP; i += PGSIZE){
     if((pte = walkpgdir(pgdir, (void*)i, 0)) == 0)
@@ -345,9 +347,11 @@ copyuvm(pde_t *pgdir, uint sz)
     if(mappages(d, (void*)i, PGSIZE, PADDR(mem), PTE_W|PTE_U) < 0)
       goto bad;
   }
+	
   return d;
 
 bad:
+	cprintf("went into bad\n");
   freevm(d);
   return 0;
 }
