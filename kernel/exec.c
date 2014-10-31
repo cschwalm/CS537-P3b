@@ -52,13 +52,14 @@ exec(char *path, char **argv)
   ip = 0;
 
   // Allocate a one-page stack at the next page boundary
-  sz = PGROUNDUP(sz);
-  
-  if((sz = allocuvm(pgdir, sz, sz + PGSIZE)) == 0)
+  //sz = PGROUNDUP(sz);
+ 	//EDIT: sz 
+  if((sp = allocuvm(pgdir, USERTOP - PGSIZE, USERTOP)) == 0)
     goto bad;
 
+	cprintf("%p\n", sp);
   // Push argument strings, prepare rest of stack in ustack.
-  sp = sz;
+  //sp = sz;
   for(argc = 0; argv[argc]; argc++) {
     if(argc >= MAXARG)
       goto bad;

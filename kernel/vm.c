@@ -197,7 +197,9 @@ inituvm(pde_t *pgdir, char *init, uint sz)
   mem = kalloc();
   memset(mem, 0, PGSIZE);
   mappages(pgdir, 0, PGSIZE, PADDR(mem), PTE_W|PTE_U);
+	cprintf("Before memmove\n");
   memmove(mem, init, sz);
+	cprintf("After memmove\n");
 }
 
 // Load a program segment into pgdir.  addr must be page-aligned
@@ -210,6 +212,9 @@ loaduvm(pde_t *pgdir, char *addr, struct inode *ip, uint offset, uint sz)
 
   if((uint)addr % PGSIZE != 0)
     panic("loaduvm: addr must be page aligned");
+
+	//NOTE: Do we need to update this to also copy stack?
+
   //EDIT: i = 0, addr is already 1000, start at 0
   //cprintf("sz: %p, addr: %p\n", sz, addr);
   for(i = 0; i < sz; i += PGSIZE){
@@ -234,7 +239,7 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
   char *mem;
   uint a;
 
-  if(newsz > USERTOP)
+  if(newsz > USERTOP - 2*PGSIZE)
     return 0;
   if(newsz < oldsz)
     return oldsz;
@@ -315,6 +320,20 @@ copyuvm(pde_t *pgdir, uint sz)
 	//EDIT: i = 0
   //cprintf("PGSIZE: %d, sz: %d\n", PGSIZE, sz);
   for(i = PGSIZE; i < sz; i += PGSIZE){
+    if((pte = walkpgdir(pgdir, (void*)i, 0)) == 0)
+      panic("copyuvm: pte should exist");
+    if(!(*pte & PTE_P))
+      panic("copyuvm: page not present");
+    pa = PTE_ADDR(*pte);
+    if((mem = kalloc()) == 0)
+      goto bad;
+    memmove(mem, (char*)pa, PGSIZE);
+    if(mappages(d, (void*)i, PGSIZE, PADDR(mem), PTE_W|PTE_U) < 0)
+      goto bad;
+  }
+
+	//EDIT: special case to copy the stack
+  for(i = USERTOP-PGSIZE; i < USERTOP; i += PGSIZE){
     if((pte = walkpgdir(pgdir, (void*)i, 0)) == 0)
       panic("copyuvm: pte should exist");
     if(!(*pte & PTE_P))
