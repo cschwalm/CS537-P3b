@@ -335,8 +335,7 @@ copyuvm(pde_t *pgdir, uint sz)
 
 	
 	//EDIT: special case to copy the stack
-  for(i = USERTOP-PGSIZE; i < USERTOP; i += PGSIZE){
-    if((pte = walkpgdir(pgdir, (void*)i, 0)) == 0)
+    if((pte = walkpgdir(pgdir, (void*)USERTOP-PGSIZE, 0)) == 0)
       panic("copyuvm: pte should exist");
     if(!(*pte & PTE_P))
       panic("copyuvm: page not present");
@@ -344,9 +343,8 @@ copyuvm(pde_t *pgdir, uint sz)
     if((mem = kalloc()) == 0)
       goto bad;
     memmove(mem, (char*)pa, PGSIZE);
-    if(mappages(d, (void*)i, PGSIZE, PADDR(mem), PTE_W|PTE_U) < 0)
+    if(mappages(d, (void*)USERTOP-PGSIZE, PGSIZE, PADDR(mem), PTE_W|PTE_U) < 0)
       goto bad;
-  }
 	
   return d;
 
