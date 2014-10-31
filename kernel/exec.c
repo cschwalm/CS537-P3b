@@ -34,7 +34,7 @@ exec(char *path, char **argv)
   // Load program into memory.
   sz = 0;
   //EDIT: changed i=0 and i<elf.phnum, EDIT changed it back
-  cprintf("elf.phoff: %d, elf.phnum: %d, PGSIZE: %d\n", elf.phoff, elf.phnum, PGSIZE);
+  //cprintf("elf.phoff: %d, elf.phnum: %d, PGSIZE: %d\n", elf.phoff, elf.phnum, PGSIZE);
   //elf.phoff: 52, elf.phnum: 2, PGSIZE: 4096
   for(i=0, off=elf.phoff; i<(elf.phnum); i++, off+=sizeof(ph)){
     if(readi(ip, (char*)&ph, off, sizeof(ph)) != sizeof(ph))
@@ -50,18 +50,18 @@ exec(char *path, char **argv)
   }
   iunlockput(ip);
   ip = 0;
-	cprintf("sz: %p\n", sz);
+	//cprintf("sz: %p\n", sz);
 
   // Allocate a one-page stack at the next page boundary
   //sz = PGROUNDUP(sz);
  	//EDIT: sz 
   if((sp = allocuvm(pgdir, USERTOP - PGSIZE, USERTOP)) == 0)
 	{
-    cprintf("failed alloc sp\n");
+    //cprintf("failed alloc sp\n");
 		goto bad;
 	}
 
-	cprintf("sp: %p\n", sp);
+	//cprintf("sp: %p\n", sp);
   // Push argument strings, prepare rest of stack in ustack.
   //sp = sz;
   for(argc = 0; argv[argc]; argc++) {

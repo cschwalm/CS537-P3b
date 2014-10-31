@@ -191,15 +191,15 @@ inituvm(pde_t *pgdir, char *init, uint sz)
 {
 	char *mem;
  	
-	cprintf("starting init\n"); 
+	//cprintf("starting init\n"); 
   if(sz >= PGSIZE)
     panic("inituvm: more than a page");
   mem = kalloc();
   memset(mem, 0, PGSIZE);
   mappages(pgdir, 0, PGSIZE, PADDR(mem), PTE_W|PTE_U);
-	cprintf("Before memmove\n");
+	//cprintf("Before memmove\n");
   memmove(mem, init, sz);
-	cprintf("After memmove\n");
+	//cprintf("After memmove\n");
 }
 
 // Load a program segment into pgdir.  addr must be page-aligned
@@ -245,6 +245,12 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
     return oldsz;
 
   a = PGROUNDUP(oldsz);
+	/*
+  cprintf("oldsz: %d\n", a);
+	if (a == 0)
+		a = PGSIZE;
+	cprintf("a: %d\n", a);
+	*/
   for(; a < newsz; a += PGSIZE){
     //EDIT We skip the initilize of this page table entry if it equals 0
 	if (a == 0)
@@ -258,7 +264,7 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
     memset(mem, 0, PGSIZE);
     mappages(pgdir, (char*)a, PGSIZE, PADDR(mem), PTE_W|PTE_U);
   }
-	cprintf("allocuvm succeeded\n");
+	//cprintf("allocuvm succeeded\n");
   return newsz;
 }
 
@@ -319,7 +325,7 @@ copyuvm(pde_t *pgdir, uint sz)
   if((d = setupkvm()) == 0)
     return 0;
 	//EDIT: i = 0
-  cprintf("PGSIZE: %d, sz: %d\n", PGSIZE, sz);
+  //cprintf("PGSIZE: %d, sz: %d\n", PGSIZE, sz);
   for(i = PGSIZE; i < sz; i += PGSIZE){
     if((pte = walkpgdir(pgdir, (void*)i, 0)) == 0)
       panic("copyuvm: pte should exist");
@@ -349,7 +355,7 @@ copyuvm(pde_t *pgdir, uint sz)
   return d;
 
 bad:
-	cprintf("went into bad\n");
+	//cprintf("went into bad\n");
   freevm(d);
   return 0;
 }

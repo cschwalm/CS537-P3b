@@ -111,7 +111,9 @@ growproc(int n)
   
   sz = proc->sz;
   if(n > 0){
-    if((sz = allocuvm(proc->pgdir, sz, sz + n)) == 0)
+    if (sz + n > USERTOP - 2*PGSIZE)
+			return -1;
+		if((sz = allocuvm(proc->pgdir, sz, sz + n)) == 0)
       return -1;
   } else if(n < 0){
     if((sz = deallocuvm(proc->pgdir, sz, sz + n)) == 0)
@@ -144,10 +146,10 @@ fork(void)
   }
   np->sz = proc->sz;
   np->parent = proc;
-	cprintf("sp: %p\n", proc->tf->esp);
+	//cprintf("sp: %p\n", proc->tf->esp);
   *np->tf = *proc->tf;
 	//np->sp = proc->sp;
-	cprintf("new sp: %p\n", np->tf->esp);
+	//cprintf("new sp: %p\n", np->tf->esp);
 
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
@@ -160,7 +162,7 @@ fork(void)
   pid = np->pid;
   np->state = RUNNABLE;
   safestrcpy(np->name, proc->name, sizeof(proc->name));
-	cprintf("pid: %d\n", pid);
+	//cprintf("pid: %d\n", pid);
   return pid;
 }
 
